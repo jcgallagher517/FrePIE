@@ -39,11 +39,20 @@ focused_probe = E1(xs**2 + ys**2, *E1_args)
 df_z = 30e3 # 3um defocus
 defocused_probe = angular_spectrum_propagation(focused_probe, df_z, wavlen, px_sz)
 
-# display probes if run as script
+# display results if run as script
 if __name__ == "__main__":
-    fig, ax = plt.subplots(2, 2)
+    fig, ax = plt.subplots(2, 2, figsize=(10, 10))
+
     ax[0][0].imshow(np.abs(focused_probe))
+    ax[0][0].set_title("Focused probe amplitude")
+
     ax[1][0].imshow(np.angle(focused_probe))
+    ax[1][0].set_title("Focused probe phase")
+
     ax[0][1].imshow(np.abs(defocused_probe))
+    ax[0][1].set_title("Defocused probe amplitude")
+
     ax[1][1].imshow(np.angle(defocused_probe))
+    ax[1][1].set_title("Defocused probe phase")
+
     plt.show()
