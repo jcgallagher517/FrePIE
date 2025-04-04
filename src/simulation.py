@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from numpy.fft import fft2, ifft2, fftshift, ifftshift, fftfreq
 from scipy.special import j1
 
-# simulate illuminating probe for data creation
+# simulating data with a defocused probe
 
 # construct Fresnel initial probe model at focal plane
 def E1(r, E0, wavlen, zp_inner_rad, zp_outer_rad, zp_f):
@@ -24,7 +24,7 @@ def angular_spectrum_propagation(psi, z, wavlen, px_size):
 # diffraction patterns via Fourier transform (Fraunhofer diffraction)
 def simulate_data(gt, probe):
 
-    num_pos = 32 # scan positions per axis
+    num_pos = 32 # scan positions per axis, hard-coded :( but whatever I'm not re-using this
     x_rng, y_rng = gt.shape[0] - probe.shape[0], gt.shape[1] - probe.shape[1]
     x_scan_idxs = np.arange(0, x_rng, x_rng//num_pos)
     y_scan_idxs = np.arange(0, y_rng, y_rng//num_pos)
@@ -61,9 +61,14 @@ focused_probe = E1(xs**2 + ys**2, *E1_args)
 df_z = 30e3 # 3um defocus
 defocused_probe = angular_spectrum_propagation(focused_probe, df_z, wavlen, px_sz)
 
-# display results if run as script
+# create initialized probe with circular support and random phase
+support = np.ones(defocused_probe.shape)*(xs**2 + ys**2 < zp_outer_rad)
+init_probe = support * np.exp(1j*np.random.random(defocused_probe.shape))
+
+
+# display probes if run as script
 if __name__ == "__main__":
-    fig, ax = plt.subplots(2, 2, figsize=(10, 10))
+    fig, ax = plt.subplots(2, 3, figsize=(10, 15))
 
     ax[0][0].imshow(np.abs(focused_probe))
     ax[0][0].set_title("Focused probe amplitude")
@@ -76,5 +81,11 @@ if __name__ == "__main__":
 
     ax[1][1].imshow(np.angle(defocused_probe))
     ax[1][1].set_title("Defocused probe phase")
+
+    ax[0][2].imshow(np.abs(init_probe))
+    ax[0][2].set_title("Initialized probe amplitude")
+
+    ax[1][2].imshow(np.angle(init_probe))
+    ax[1][2].set_title("Initialized probe phase")
 
     plt.show()
