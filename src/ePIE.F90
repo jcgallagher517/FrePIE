@@ -5,7 +5,7 @@ function ePIE (obj, prb, dps, scan_pos, obj_step, prb_step, n_iters) result (err
 
   ! dps and scan_pos should share first axis dimension
   real, intent(in) :: dps(:, :, :)
-  real, intent(in) :: scan_pos(2, size(dps, 3))
+  real, intent(in) :: scan_pos(size(dps, 1), 2)
 
   ! hyperparameters
   integer, intent(in) :: n_iters
@@ -19,15 +19,9 @@ function ePIE (obj, prb, dps, scan_pos, obj_step, prb_step, n_iters) result (err
   integer :: n_dps, iter
   real :: error_per_iter
   n_dps = size(dps, 3)
-  
-  ! change the errors in a non-trivial way just to test
-  do iter = 1,20
-     print *, iter
-     errors(iter) = iter * 3.0
-  enddo
 
-  print *, "Passed"
-  obj = 5*obj
-  prb = 2*prb
+  ! ePIE algorithm begins here
+
+  
 
 end function ePIE

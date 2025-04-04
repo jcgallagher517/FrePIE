@@ -8,15 +8,18 @@ def FrePIE(init_obj, init_prb, dps, scan_pos,
     inputs:
         obj: initialized object (big_N, big_N)
         prb: initialized probe (lil_N, lil_N)
-        dps: diffraction data (lil_N, lil_N, k)
-        scan_pos: (2, k)
+        dps: diffraction data (k, lil_N, lil_N)
+        scan_pos: (k, 2)
     outputs:
         rec_object, rec_probe, error_array
     """
-    f_obj = np.asfortranarray(np.copy(obj, order = 'F'))
-    f_prb = np.asfortranarray(np.copy(prb, order = 'F'))
+    # while local imports are usually cursed, I think it makes sense here
+    # because a user should never call the F90 module directly
+    # which the local scoping disallows, s.t. this wrapper supercedes it
+    from ePIE import epie
+    f_obj = np.asfortranarray(np.copy(init_obj, order = 'F'))
+    f_prb = np.asfortranarray(np.copy(init_prb, order = 'F'))
     f_dps = np.asfortranarray(np.copy(dps, order = 'F'))
-    from ePIE import epie # are local imports cursed?
     errors = epie(f_obj, f_prb, f_dps, scan_pos, obj_step, prb_step, n_iters)
     return f_obj, f_prb, errors
 
@@ -26,13 +29,12 @@ def PyePIE(init_obj, init_prb, dps, scan_pos,
     """python implementation of ePIE for prototyping and speed comparison
     same arguments and returns as FrePIE
     """
-
     obj, prb = init_obj, init_prb
     prb_sz = init_prb.shape[0]
     errors = []
     for iter in range(N_iters):
         error_per_iter = 0
-        for (x, y), dp in zip(scan_pos, np.rollaxis(dps, 2, 0)):
+        for (x, y), dp in zip(scan_pos, dps):
 
             lil_obj = obj[x:x+prb_sz, y:y+prb_sz]
 

@@ -19,3 +19,5 @@ init_obj = np.exp(1j*np.random.random(ground_truth.shape))
 
 # time first five iterations of Python and Fortran reconstructions
 # run Fortran reconstruction for 100 iterations and display results
+
+rec, rec_probe, errors = FrePIE(init_obj, init_probe, dps, scan_pos)

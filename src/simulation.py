@@ -31,7 +31,7 @@ def simulate_data(gt, probe):
 
     # initialize diffraction patterns
     dps = np.zeros((*probe.shape, len(x_scan_idxs)*len(y_scan_idxs)),
-                   dtype=np.complex128)
+                   dtype=np.float64)
 
     # scan across x for each y position
     scan_positions, dp_idx = [], 0
@@ -41,7 +41,7 @@ def simulate_data(gt, probe):
             dps[:, :, dp_idx] = np.abs(fftshift(fft2(sub_obj)))
             dp_idx += 1
             scan_positions.append((x, y))
-    return np.array(scan_positions), dps
+    return np.array(scan_positions), np.rollaxis(dps, 2, 0)
 
 # experimental parameters, all length-scales in nm
 E0 = 1 # related to photon flux, not sure yet what to put here
