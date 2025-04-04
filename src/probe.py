@@ -21,6 +21,28 @@ def angular_spectrum_propagation(psi, z, wavlen, px_size):
     Dz = np.exp(1j*kz*z)
     return ifft2(fft2(psi)*ifftshift(Dz))
 
+# diffraction patterns via Fourier transform (Fraunhofer diffraction)
+def simulate_data(gt, probe):
+
+    num_pos = 32 # scan positions per axis
+    x_rng, y_rng = gt.shape[0] - probe.shape[0], gt.shape[1] - probe.shape[1]
+    x_scan_idxs = np.arange(0, x_rng, x_rng//num_pos)
+    y_scan_idxs = np.arange(0, y_rng, y_rng//num_pos)
+
+    # initialize diffraction patterns
+    dps = np.zeros((*probe.shape, len(x_scan_idxs)*len(y_scan_idxs)),
+                   dtype=np.complex128)
+
+    # scan across x for each y position
+    scan_positions, dp_idx = [], 0
+    for y in y_scan_idxs:
+        for x in x_scan_idxs:
+            sub_obj = gt[x:x+probe.shape[0], y:y+probe.shape[1]]
+            dps[:, :, dp_idx] = np.abs(fftshift(fft2(sub_obj)))
+            dp_idx += 1
+            scan_positions.append((x, y))
+    return np.array(scan_positions), dps
+
 # experimental parameters, all length-scales in nm
 E0 = 1 # related to photon flux, not sure yet what to put here
 wavlen = 13 # 13nm source

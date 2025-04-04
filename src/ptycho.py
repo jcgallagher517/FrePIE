@@ -1,38 +1,60 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.fft import fft2, fftshift
+from numpy.fft import fft2, ifft2, fftshift, ifftshift
 from skimage.data import camera
 
+# stuff from my own modules
+from probe import simulate_data
 from probe import defocused_probe
 
+# ground-truth image
 img = camera()/255
-ground_truth = img + 1j*img
+ground_truth = img*np.exp(1j*(img - 0.5)*2*np.pi)
+
+# simulated diffraction patterns
+scan_positions, dps = simulate_data(ground_truth, defocused_probe)
+
+# quick ePIE in Python so that I know my simulated data works
+# and for a model when I implement in Fortran
+
+# initialize with constant modulus and random phase
+init_obj = np.exp(1j*np.random.random(ground_truth.shape))
+
+# initialize probe with circular support
+prb_sz, px_sz = 128, 10 # 128x128 probe with 10nm pixel size
+probe_axis = np.linspace(-(prb_sz//2)*px_sz, (prb_sz//2)*px_sz, prb_sz)
+xs, ys = np.meshgrid(probe_axis, probe_axis)
+support = np.ones(defocused_probe.shape)*(xs**2 + ys**2 < 130e3)
+init_prb = support * np.exp(1j*np.random.random(defocused_probe.shape))
 
 
-# get diffraction patterns from Fourier transform (Fraunhofer diffraction)
-def simulate_data(gt, probe):
+def ePIE(init_obj, init_prb, obj_step = 1, prb_step = 1, N_iters = 50):
 
-    num_pos = 32 # scan positions per axis
-    x_rng, y_rng = gt.shape[0] - probe.shape[0], gt.shape[1] - probe.shape[1]
-    x_scan_idxs = np.arange(0, x_rng, x_rng//num_pos)
-    y_scan_idxs = np.arange(0, y_rng, y_rng//num_pos)
+    obj, prb = init_obj, init_prb
+    prb_sz = init_prb.shape[0]
+    errors = []
+    for iter in range(N_iters):
+        error_per_iter = 0
+        for (x, y), dp in zip(scan_positions, np.rollaxis(dps, 2, 0)):
 
-    # initialize diffraction patterns
-    dps = np.zeros((*probe.shape, len(x_scan_idxs)*len(y_scan_idxs)),
-                   dtype=np.complex128)
+            lil_obj = obj[x:x+prb_sz, y:y+prb_sz]
 
-    # scan across x for each y position
-    dp_i = 0
-    for y in y_scan_idxs:
-        for x in x_scan_idxs:
-            sub_obj = ground_truth[x:x+probe.shape[0], y:y+probe.shape[1]]
-            dps[:, :, dp_i] = fftshift(fft2(sub_obj))
-            dp_i += 1
-    return dps
+            # exit wave and its Fourier transform
+            psi = lil_obj*prb
+            psi_k = fft2(psi)
 
-dps = simulate_data(ground_truth, defocused_probe)
+            # replace modulus with (amplitude of..) diffraction pattern
+            psi_k_p = dp*psi_k/np.abs(psi_k)
+            psi_p = ifft2(psi_k_p)
 
+            # update object and probe
+            obj[x:x+prb_sz, y:y+prb_sz] = lil_obj + obj_step*np.conj(prb)*(psi_p - psi)/np.max(np.abs(prb)**2)
+            prb = prb + prb_step*np.conj(lil_obj)*(psi_p - psi)/np.max(np.abs(lil_obj)**2)
 
-# try python reconstruction to see if I did it right
-def ePIE(dps, init_obj, init_probe):
-    pass
+            error_per_iter += np.mean(np.abs(psi_p - psi))**2
+
+        errors.append(np.sqrt(error_per_iter))
+
+    return obj, np.array(errors)
+
+rec, errors = ePIE(init_obj, init_prb)
