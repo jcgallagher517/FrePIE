@@ -1,5 +1,7 @@
 function ePIE (obj, prb, dps, scan_pos, obj_step, prb_step, n_iters) result (errors)
+  use fftpack
   implicit none
+
   ! RMS error array, return value of function
   real :: errors(n_iters)
 
