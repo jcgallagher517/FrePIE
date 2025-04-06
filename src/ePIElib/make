@@ -1,0 +1,2 @@
+#!/bin/sh
+gcc -fPIC -shared -o ePIE.so ePIE.c

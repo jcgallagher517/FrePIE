@@ -1,10 +1,25 @@
 import numpy as np
 from numpy.fft import fft2, ifft2, fftshift, ifftshift
+import ctypes
+from numpy.ctypeslib import ndpointer
+
+
+lib = ctypes.cdll.LoadLibrary("ePIElib/ePIE.so")
+fun = lib.test_fun
+fun.restype = None
+fun.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                ctypes.c_size_t,
+                ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
+
+indata = np.ones((5, 6))
+outdata = np.empty((5, 6))
+fun(indata, indata.size, outdata)
+print(outdata)
+
 
 def FrePIE(init_obj, init_prb, dps, scan_pos,
            obj_step = 1, prb_step = 1, n_iters = 100):
-    """wrapper to call F90 ePIE implementation
-    so that args are not mutated directly
+    """wrapper to call C ePIE implementation
     inputs:
         obj: initialized object (big_N, big_N)
         prb: initialized probe (lil_N, lil_N)
@@ -13,15 +28,7 @@ def FrePIE(init_obj, init_prb, dps, scan_pos,
     outputs:
         rec_object, rec_probe, error_array
     """
-    # while local imports are usually cursed, I think it makes sense here
-    # because a user should never call the F90 module directly
-    # which the local scoping disallows, s.t. this wrapper supercedes it
-    from ePIE import epie
-    f_obj = np.asfortranarray(np.copy(init_obj, order = 'F'))
-    f_prb = np.asfortranarray(np.copy(init_prb, order = 'F'))
-    f_dps = np.asfortranarray(np.copy(dps, order = 'F'))
-    errors = epie(f_obj, f_prb, f_dps, scan_pos, obj_step, prb_step, n_iters)
-    return f_obj, f_prb, errors
+    pass
 
 
 def PyePIE(init_obj, init_prb, dps, scan_pos,
