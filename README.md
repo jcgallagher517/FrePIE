@@ -2,6 +2,14 @@
 
 A basic implementation of ePIE for soft x-ray ptychography using C linked to Python. Done for the purpose of learning how to write and call more performant code within Python when needed. Originally, I planned on implementing the backend with Fortran, hence "FrePIE", but I gave up using that arcane language and kept the name.
 
+FrePIE requires the [FFTW](https://fftw.org/fftw3_doc/Installation-on-Unix.html) library. 
+To get the shared libraries for linking with Python, you should build fftw from source, with the following configuration flag.
+```bash
+./configure --enable-shared
+make
+sudo make install
+```
+
 # References
 
 * Andrew M. Maiden, John M. Rodenburg, "An improved ptychographical phase retrieval algorithm for diffractive imaging", Ultramicroscopy, Volume 109, Issue 10, Pages 1256-1262, ISSN 0304-3991 (2009)

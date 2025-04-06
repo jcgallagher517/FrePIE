@@ -4,17 +4,30 @@ import ctypes
 from numpy.ctypeslib import ndpointer
 
 
-lib = ctypes.cdll.LoadLibrary("ePIElib/ePIE.so")
-fun = lib.test_fun
-fun.restype = None
-fun.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                ctypes.c_size_t,
-                ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
+lib = ctypes.cdll.LoadLibrary("ePIElibc/ePIE.so")
 
-indata = np.ones((5, 6))
-outdata = np.empty((5, 6))
+class c_double_complex(ctypes.Structure): 
+    """complex is a c structure
+    https://docs.python.org/3/library/ctypes.html#module-ctypes suggests
+    to use ctypes.Structure to pass structures (and, therefore, complex)
+    """
+    _fields_ = [("real", ctypes.c_double),("imag", ctypes.c_double)]
+    @property
+    def value(self):
+        return self.real+1j*self.imag # fields declared above
+
+
+fun = lib.fft
+fun.restype = None
+fun.argtypes = [ctypes.c_size_t,
+                ndpointer(c_double_complex, flags="C_CONTIGUOUS"),
+                ndpointer(c_double_complex, flags="C_CONTIGUOUS")]
+
+template = np.ones(16)
+indata = np.cos(template) + 1j*np.sin(template)
+outdata = np.empty(indata.size)
+
 fun(indata, indata.size, outdata)
-print(outdata)
 
 
 def FrePIE(init_obj, init_prb, dps, scan_pos,
