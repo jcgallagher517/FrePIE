@@ -3,30 +3,30 @@
 #include <math.h>
 #include <fftw3.h>
 
-void fft(size_t size, double complex *signal, double complex *output) {
-  fftw_plan p = fftw_plan_dft_1d(size, signal, output, FFTW_FORWARD, FFTW_ESTIMATE);
+void compute_fft(size_t size, double *in_real, double *in_imag, double *out_real, double *out_imag) {
+
+  // initialize inputs and outputs as complex numbers
+  fftw_complex *in, *out;
+  in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*size);
+  out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*size);
+  for (int i = 0; i < size; ++i) {
+    in[i] = in_real[i] + I*in_imag[i];
+    printf("%f + i%f\n", creal(in[i]), cimag(in[i]));
+  }
+
+  printf("\n\n");
+
+  // execute one-dimensional FFT on input
+  fftw_plan p = fftw_plan_dft_1d(size, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
   fftw_execute(p);
+
+  for (int i = 0; i < size; ++i) {
+    out_real[i] = creal(out[i]);
+    out_imag[i] = cimag(out[i]);
+    printf("%f + i%f\n", out_real[i], out_imag[i]);
+  }
+
   fftw_destroy_plan(p);
+  fftw_free(in); fftw_free(out);
 }
 
-// remove main when shipping as python library
-int main() {
-
-  size_t N = 16;
-  double complex signal[N], output[N];
-
-  // initialize data
-  for (int i = 0; i < N; ++i) {
-    signal[i] = cos(i) + I*sin(i);
-  }
-
-  // apply fft
-  fft(N, signal, output);
-
-  // print input and output
-  for (int i = 0; i < N; ++i) {
-    printf("%.2f exp(i%.2f)\n", cabs(output[i]), carg(output[i]));
-  }
-
-  return 0;
-}
