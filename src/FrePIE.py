@@ -3,32 +3,27 @@ import ctypes
 from numpy.ctypeslib import ndpointer
 
 
+# simple 1d fft example checks out
+"""
 lib = ctypes.cdll.LoadLibrary("ePIElibc/ePIE.so")
-
 fft = lib.compute_fft
 fft.restype = None
+complex128_ptr = ndpointer(dtype=np.complex128, flags="C_CONTIGUOUS")
 fft.argtypes = [ctypes.c_size_t,
-                ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
+                complex128_ptr,
+                complex128_ptr]
 
 def call_fft(indata):
     outdata = np.empty(indata.size, dtype=indata.dtype)
     fft(indata.size,
-        np.ascontiguousarray(indata.real),
-        np.ascontiguousarray(indata.imag),
-        np.ascontiguousarray(outdata.real),
-        np.ascontiguousarray(outdata.imag))
+        np.ascontiguousarray(indata),
+        np.ascontiguousarray(outdata))
     return outdata
 
 template = np.linspace(0, 8*np.pi, 32)
 indata = np.cos(template) + 0j
 outdata = call_fft(indata)
-
-# this does not match the output from within the c function itself. WHY?
-for z in outdata:
-    print(f"{z.real} + i{z.imag}")
+"""
 
 
 
