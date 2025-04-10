@@ -1,14 +1,10 @@
 # FrePIE
 
-A basic implementation of ePIE for soft x-ray ptychography using C linked to Python. Done for the purpose of learning how to write and call more performant code within Python when needed. Originally, I planned on implementing the backend with Fortran, hence "FrePIE", but I gave up using that arcane language and kept the name.
+A basic implementation of ePIE for simulated EUV or soft x-ray ptychography data using C++ linked to Python. Done for the purpose of learning how to write and call more performant code within Python when needed. Originally, I planned on implementing the backend with Fortran, hence "FrePIE", but I gave up using that arcane language and kept the name. I then tried C with Python's native Ctypes, but wrapping complex types and flattening all the matrices for computation proved to be a headache. Finally, C++ with PyBind11 proved to be very seamless and practical.
 
 FrePIE requires the [FFTW](https://fftw.org/fftw3_doc/Installation-on-Unix.html) library. 
-To get the shared libraries for linking with Python, you should build fftw from source, with the following configuration flag.
-```bash
-./configure --enable-shared
-make
-sudo make install
-```
+To get the shared libraries for linking with Python, you should build fftw from source, 
+with the ```./configure --enable-shared``` configuration flag.
 
 # References
 
