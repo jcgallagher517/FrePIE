@@ -2,16 +2,18 @@
 #include <vector>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include <pybind11/stl.h>
+// #include <pybind11/stl.h>
 #include <Eigen/Dense>
-
 #include "ePIE.hpp"
 
 namespace py = pybind11;
 namespace eig = Eigen;
 
+
 // cast the py::array_t objects as Eigen matrices
-template <typename T> eig::Matrix<T, eig::Dynamic, eig::Dynamic> numpy_to_eigen(py::array_t<T> array) {
+template <typename T>
+eig::Matrix<T, eig::Dynamic, eig::Dynamic>
+numpy_to_eigen(py::array_t<T> array) {
 
   py::buffer_info buf = array.request();
   if (buf.ndim != 2) {
@@ -27,7 +29,7 @@ template <typename T> eig::Matrix<T, eig::Dynamic, eig::Dynamic> numpy_to_eigen(
 
 
 // ad hoc turn dps into a vector of Eigen matrices for each dp
-std::vector<eig::MatrixXd> process_dps(py::array_t<double> dps) {
+std::vector<eig::MatrixXd> dps_to_eigen(py::array_t<double> dps) {
 
   py::buffer_info buf = dps.request();
 
@@ -57,22 +59,19 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
 {
   std::vector<double> errors = ePIE(numpy_to_eigen(obj),
                                     numpy_to_eigen(prb),
-                                    process_dps(dps),
+                                    dps_to_eigen(dps),
                                     numpy_to_eigen(scan_pos),
                                     obj_step, prb_step, n_iters);
 
   auto result = py::array_t<double>(errors.size());
   std::copy(errors.begin(), errors.end(), result.mutable_data());
-  return result;
+  return result; // look into returning a dict
 }
 
 
-// finally, define module to export to Python
 PYBIND11_MODULE(FrePIElibcpp, m) {
-
   m.def("ePIE", &ePIE_wrapper, "Robust iterative ptychography algorithm",
         py::arg("obj"), py::arg("prb"),
         py::arg("dps"), py::arg("scan_pos"),
         py::arg("obj_step"), py::arg("prb_step"), py::arg("n_iters"));
-
 }

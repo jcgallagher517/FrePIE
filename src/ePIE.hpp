@@ -1,7 +1,6 @@
 #ifndef EPIE_HPP
 #define EPIE_HPP
 
-#include <complex>
 #include <vector>
 #include <Eigen/Dense>
 
