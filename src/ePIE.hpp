@@ -3,12 +3,14 @@
 
 #include <complex>
 #include <vector>
-#include <xtensor/containers/xarray.hpp>
+#include <Eigen/Dense>
 
-std::vector<double> ePIE(xt::xarray<std::complex<double>> obj,
-                         xt::xarray<std::complex<double>> prb,
-                         xt::xarray<double> dps,
-                         xt::xarray<int> scan_pos,
+namespace eig = Eigen;
+
+std::vector<double> ePIE(eig::MatrixXcd obj,
+                         eig::MatrixXcd prb,
+                         const std::vector<eig::MatrixXd>& dps,
+                         const eig::MatrixXi& scan_pos,
                          double obj_step, double prb_step, int n_iters);
   /* ePIE ptychographic reconstruction routine
      @params:

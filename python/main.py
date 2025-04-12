@@ -1,14 +1,9 @@
-import sys
-import glob
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.data import camera
 
-from simulation import defocused_probe, init_probe, simulate_data
-sys.path.append(glob.glob("../build/lib*/")[0])
-import FrePIE
-
-# from FrePIE import FrePIE
+from simulation import simulate_data, defocused_probe, init_probe
+from FrePIE import FrePIE
 from PyePIE import PyePIE
 
 # ground-truth image
@@ -21,7 +16,13 @@ scan_pos, dps = simulate_data(ground_truth, defocused_probe)
 # initialize reconstruction with constant modulus and random phase
 init_obj = np.exp(1j*np.random.random(ground_truth.shape))
 
+results_dict = FrePIE(init_obj, init_probe, dps, scan_pos,
+                      obj_step = 1, prb_step = 1, n_iters = 100)
 
-obj = np.copy(init_obj)
-prb = np.copy(init_probe)
-errors = FrePIE.ePIE(obj, prb, dps, scan_pos, 1, 1, 100)
+
+# THERE IS A MINOR BUG IN SIMULATION CODE
+# last scan_pos on either axis is 372
+# 372 + 128 = 500 != 512
+# the scan positions are in steps of 12
+# so I am missing the last 12 pixels along either axis
+# which I noticed earlier from PyePIE and found strange
