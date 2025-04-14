@@ -19,13 +19,13 @@ library_dirs = [
 
 ext_modules = [
     Pybind11Extension(
-        name = "FrePIElibcpp",
+        name = "libFrePIE",
         sources = sorted(glob.glob("src/*.cpp")), # sorted for reproducibility
         include_dirs = include_dirs,
         library_dirs = library_dirs,
-#        libraries = [],
+        libraries = ["fftw3"],
         language = "c++",
-        cxx_std = 17)]
-#        extra_compile_args = ["-Wall"])] # shows warnings from libraries
+        cxx_std = 17,
+        extra_compile_args = ["-Wall"])]
 
-setup(name = "FrePIElibcpp", ext_modules = ext_modules)
+setup(name = "libFrePIE", ext_modules = ext_modules)

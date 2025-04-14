@@ -6,9 +6,10 @@
 #include <Eigen/Dense>
 #include "ePIE.hpp"
 
+#include <iostream>
+
 namespace py = pybind11;
 namespace eig = Eigen;
-
 
 // cast the py::array_t objects as Eigen matrices
 template <typename T>
@@ -19,10 +20,8 @@ numpy_to_eigen(py::array_t<T> array) {
   if (buf.ndim != 2) {
     throw std::runtime_error("NumPy array must be 2D");
   }
-
-  auto rows = static_cast<eig::Index>(buf.shape[0]);
-  auto cols = static_cast<eig::Index>(buf.shape[1]);
-
+  int rows = buf.shape[0];
+  int cols = buf.shape[1];
   using MatrixType = eig::Matrix<T, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
   return eig::Map<MatrixType>(static_cast<T*>(buf.ptr), rows, cols);
 }
@@ -31,24 +30,21 @@ numpy_to_eigen(py::array_t<T> array) {
 // ad hoc turn dps into a vector of Eigen matrices for each dp
 std::vector<eig::MatrixXd> dps_to_eigen(py::array_t<double> dps) {
 
+  // collect info from numpy array
   py::buffer_info buf = dps.request();
-
-  int n_dps = buf.shape[0];
-  ssize_t rows = buf.shape[1];
-  ssize_t cols = buf.shape[2];
-
-  std::vector<eig::MatrixXd> new_dps;
-  new_dps.reserve(n_dps);
-
-  // un-flatten data, every row*col is a new dp
   double* data = static_cast<double*>(buf.ptr);
+  int n_dps = buf.shape[0];
+  int rows = buf.shape[1];
+  int cols = buf.shape[2];
+
+  // un-flatten data, every row*col is the next dp
+  std::vector<eig::MatrixXd> new_dps(n_dps);
   using MatrixType = eig::Matrix<double, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
-  for (ssize_t k = 0; k < n_dps; ++k) {
-    new_dps.emplace_back(eig::Map<MatrixType>(data + k*rows*cols, rows, cols));
+  for (int k = 0; k < n_dps; ++k) {
+    new_dps[k] = eig::Map<MatrixType>(data + k * rows * cols, rows, cols);
   }
   return new_dps;
 }
-
 
 // wrapper function to call ePIE implementation as defined in ePIE.cpp
 py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
@@ -57,19 +53,31 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
                                  const py::array_t<int>& scan_pos,
                                  double obj_step, double prb_step, int n_iters)
 {
-  std::vector<double> errors = ePIE(numpy_to_eigen(obj),
-                                    numpy_to_eigen(prb),
+
+  // cast object and probe as eigen matrices
+  using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+  MatXcdRM eigen_obj = numpy_to_eigen(obj);
+  MatXcdRM eigen_prb = numpy_to_eigen(prb);
+
+  std::vector<double> errors = ePIE(eigen_obj, eigen_prb,
                                     dps_to_eigen(dps),
                                     numpy_to_eigen(scan_pos),
                                     obj_step, prb_step, n_iters);
+
+  // convert object and probe data back to numpy-compatible forms
+  py::buffer_info obj_buf, prb_buf;
+  obj_buf = obj.request();
+  prb_buf = prb.request();
+  obj_buf.ptr = eigen_obj.data();
+  prb_buf.ptr = eigen_prb.data();
+
 
   auto result = py::array_t<double>(errors.size());
   std::copy(errors.begin(), errors.end(), result.mutable_data());
   return result; // look into returning a dict
 }
 
-
-PYBIND11_MODULE(FrePIElibcpp, m) {
+PYBIND11_MODULE(libFrePIE, m) {
   m.def("ePIE", &ePIE_wrapper, "Robust iterative ptychography algorithm",
         py::arg("obj"), py::arg("prb"),
         py::arg("dps"), py::arg("scan_pos"),

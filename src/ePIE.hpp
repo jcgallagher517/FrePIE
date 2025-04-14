@@ -6,8 +6,8 @@
 
 namespace eig = Eigen;
 
-std::vector<double> ePIE(eig::MatrixXcd obj,
-                         eig::MatrixXcd prb,
+std::vector<double> ePIE(eig::Ref<eig::MatrixXcd> obj,
+                         eig::Ref<eig::MatrixXcd> prb,
                          const std::vector<eig::MatrixXd>& dps,
                          const eig::MatrixXi& scan_pos,
                          double obj_step, double prb_step, int n_iters);

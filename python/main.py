@@ -16,9 +16,12 @@ scan_pos, dps = simulate_data(ground_truth, defocused_probe)
 # initialize reconstruction with constant modulus and random phase
 init_obj = np.exp(1j*np.random.random(ground_truth.shape))
 
-results_dict = FrePIE(init_obj, init_probe, dps, scan_pos,
+results_dict = FrePIE(ground_truth, init_probe, dps, scan_pos,
                       obj_step = 1, prb_step = 1, n_iters = 100)
 
+
+recon = results_dict["recon"]
+fft_of_gt = np.fftshift(np.fft.fft2(ground_truth))
 
 # THERE IS A MINOR BUG IN SIMULATION CODE
 # last scan_pos on either axis is 372

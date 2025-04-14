@@ -3,7 +3,7 @@ from glob import glob
 import numpy as np
 
 sys.path.append(glob("../build/lib*/")[0])
-from FrePIElibcpp import ePIE as _ePIE_cpp
+from libFrePIE import ePIE as _ePIE_cpp
 
 def FrePIE(init_obj, init_prb, dps, scan_pos,
            obj_step = 1, prb_step = 1, n_iters = 100):
