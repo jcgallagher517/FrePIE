@@ -12,50 +12,6 @@
 namespace eig = Eigen;
 
 
-// maybe define this in another file?
-class FFT_2D {
-public:
-
-  using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
-
-  FFT_2D(int rows, int cols, int direction)
-    : rows_(rows),
-      cols_(cols),
-      direction_(direction),
-      in_(rows, cols),
-      out_(rows, cols)
-  {
-    plan_ = fftw_plan_dft_2d(rows_, cols_,
-                             reinterpret_cast<fftw_complex*>(in_.data()),
-                             reinterpret_cast<fftw_complex*>(out_.data()),
-                             direction, FFTW_MEASURE);
-  }
-
-  ~FFT_2D() {
-    fftw_destroy_plan(plan_);
-  }
-
-  void compute(const MatXcdRM& input, MatXcdRM output) {
-    in_ = input;
-    fftw_execute(plan_);
-    output = out_;
-
-    if (direction_ == FFTW_BACKWARD) {
-      output /= rows_ * cols_;
-    }
-  }
-
-private:
-
-  int rows_, cols_;
-  int direction_;
-  MatXcdRM in_, out_;
-  fftw_plan plan_;
-
-};
-
-
-
 // main ePIE implementation here
 
 // import error mentioning Eigen Matrices arose when I started passing by reference
