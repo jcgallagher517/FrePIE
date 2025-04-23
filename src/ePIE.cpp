@@ -30,12 +30,12 @@ std::vector<double> ePIE(MatXcdRM& obj,
 
   FFT2 fft(obj.rows(), obj.cols(), FFTW_FORWARD);
   fft.compute(obj, obj);
-  fft.fftshift(obj, obj);
+  obj = fft.fftshift(obj);
 
   // main loops, do stuff here later
-  double error_per_iter;
   std::vector<double> errors(n_iters);
-  int x_pos, y_pos;
+  // double error_per_iter;
+  // int x_pos, y_pos;
   // for (int iter = 1; iter <= n_iters; ++iter) {
   //   error_per_iter = 0;
   //   for (int k = 0; k < n_dps; ++k) {

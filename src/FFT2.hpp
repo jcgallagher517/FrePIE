@@ -22,8 +22,8 @@ public:
 
   void compute(const MatXcdRM& input, MatXcdRM& output);
 
-  void fftshift(const MatXcdRM& input, MatXcdRM& output);
-  void ifftshift(const MatXcdRM& input, MatXcdRM& output);
+  MatXcdRM fftshift(const MatXcdRM& input);
+  MatXcdRM ifftshift(const MatXcdRM& input);
 
 private:
   
@@ -32,7 +32,7 @@ private:
   MatXcdRM in_, out_;
   fftw_plan plan_;
 
-  void circshift(const MatXcdRM& input, MatXcdRM& output, int row_shift, int col_shift);
+  MatXcdRM circshift(const MatXcdRM& input, int row_shift, int col_shift);
 
 };
 

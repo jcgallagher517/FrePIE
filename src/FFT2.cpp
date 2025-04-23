@@ -36,26 +36,28 @@ void FFT2::compute(const MatXcdRM& input, MatXcdRM& output) {
   }
 }
 
-void FFT2::circshift(const MatXcdRM& input, MatXcdRM& output, int row_shift, int col_shift) {
+MatXcdRM FFT2::circshift(const MatXcdRM &input, int row_shift, int col_shift) {
   int rows = input.rows();
   int cols = input.cols();
+  MatXcdRM output(rows, cols);
   assert(rows == output.rows() && cols == output.cols());
 
   // credit to this stackoverflow answer
   // https://stackoverflow.com/questions/5915125/fftshift-ifftshift-c-c-source-code
-  for (int i = 0; i < rows; ++i) {
-    int ii = (i + row_shift) % rows;
-    for (int j = 0; j < cols; ++j) {
-      int jj = (j + col_shift) % cols;
-      output(ii, jj) = input(i, j);
+  for (int r = 0; r < rows; ++r) {
+    int rr = (r + row_shift) % rows;
+    for (int c = 0; c < cols; ++c) {
+      int cc = (c + col_shift) % cols;
+      output(rr, cc) = input(r, c);
     }
   }
+  return output;
 }
 
-void FFT2::fftshift(const MatXcdRM& input, MatXcdRM& output) {
-  FFT2::circshift(input, output, input.rows()/2, input.cols()/2);
+MatXcdRM FFT2::fftshift(const MatXcdRM& input) {
+  return FFT2::circshift(input, input.rows()/2, input.cols()/2);
 }
 
-void FFT2::ifftshift(const MatXcdRM& input, MatXcdRM& output) {
-  FFT2::circshift(input, output, (input.rows() + 1)/2, (input.cols() + 1)/2);
+MatXcdRM FFT2::ifftshift(const MatXcdRM& input) {
+  return FFT2::circshift(input, (input.rows() + 1)/2, (input.cols() + 1)/2);
 }
