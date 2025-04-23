@@ -20,7 +20,7 @@ public:
   FFT2(int rows, int cols, int direction);
   ~FFT2();
 
-  void compute(const MatXcdRM& input, MatXcdRM output);
+  void compute(const MatXcdRM& input, MatXcdRM& output);
 
 private:
   

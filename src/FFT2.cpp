@@ -25,7 +25,7 @@ FFT2::~FFT2() {
   fftw_destroy_plan(plan_);
 }
 
-void FFT2::compute(const MatXcdRM& input, MatXcdRM output) {
+void FFT2::compute(const MatXcdRM& input, MatXcdRM& output) {
   in_ = input;
   fftw_execute(plan_);
   output = out_;
