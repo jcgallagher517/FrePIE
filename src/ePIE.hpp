@@ -6,8 +6,9 @@
 
 namespace eig = Eigen;
 
-std::vector<double> ePIE(eig::Ref<eig::MatrixXcd> obj,
-                         eig::Ref<eig::MatrixXcd> prb,
+using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+std::vector<double> ePIE(MatXcdRM& obj,
+                         MatXcdRM& prb, 
                          const std::vector<eig::MatrixXd>& dps,
                          const eig::MatrixXi& scan_pos,
                          double obj_step, double prb_step, int n_iters);

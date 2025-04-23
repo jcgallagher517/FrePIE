@@ -2,7 +2,7 @@
 #include <vector>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-// #include <pybind11/stl.h>
+// #include <pybind11/eigen.h>
 #include <Eigen/Dense>
 #include "ePIE.hpp"
 
@@ -59,22 +59,23 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
   MatXcdRM eigen_obj = numpy_to_eigen(obj);
   MatXcdRM eigen_prb = numpy_to_eigen(prb);
 
-  std::vector<double> errors = ePIE(eigen_obj, eigen_prb,
+  // only eigen_obj and eigen_prb are passed by reference
+  std::vector<double> errors = ePIE(eigen_obj,
+                                    eigen_prb,
                                     dps_to_eigen(dps),
                                     numpy_to_eigen(scan_pos),
                                     obj_step, prb_step, n_iters);
 
-  // convert object and probe data back to numpy-compatible forms
-  py::buffer_info obj_buf, prb_buf;
-  obj_buf = obj.request();
-  prb_buf = prb.request();
-  obj_buf.ptr = eigen_obj.data();
-  prb_buf.ptr = eigen_prb.data();
+  // copy data from eigen_obj/eigen_prb back to python data pointers
+  py::buffer_info obj_buf = obj.request();
+  py::buffer_info prb_buf = prb.request();
+  std::memcpy(obj_buf.ptr, eigen_obj.data(), sizeof(std::complex<double>) * eigen_obj.size());
+  std::memcpy(prb_buf.ptr, eigen_prb.data(), sizeof(std::complex<double>) * eigen_prb.size());
 
-
+  // return errors as array
   auto result = py::array_t<double>(errors.size());
   std::copy(errors.begin(), errors.end(), result.mutable_data());
-  return result; // look into returning a dict
+  return result;
 }
 
 PYBIND11_MODULE(libFrePIE, m) {

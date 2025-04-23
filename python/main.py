@@ -19,9 +19,9 @@ init_obj = np.exp(1j*np.random.random(ground_truth.shape))
 results_dict = FrePIE(ground_truth, init_probe, dps, scan_pos,
                       obj_step = 1, prb_step = 1, n_iters = 100)
 
-
-recon = results_dict["recon"]
-fft_of_gt = np.fftshift(np.fft.fft2(ground_truth))
+rec_object = results_dict["recon"]
+rec_probe = results_dict["probe"]
+rec_error = results_dict["error"]
 
 # THERE IS A MINOR BUG IN SIMULATION CODE
 # last scan_pos on either axis is 372
