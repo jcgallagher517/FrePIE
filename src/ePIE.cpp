@@ -10,7 +10,6 @@
 #include <chrono>
 
 namespace eig = Eigen;
-// using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
 using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
 
 std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,

@@ -38,6 +38,7 @@ void FFT2::compute(const ArrayXcdRM& input, ArrayXcdRM& output) {
   if (direction_ == FFTW_BACKWARD) {
     output /= rows_ * cols_;
   }
+
 }
 
 ArrayXcdRM FFT2::circshift(const ArrayXcdRM &input, int row_shift, int col_shift) {

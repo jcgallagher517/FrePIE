@@ -4,7 +4,7 @@ A basic implementation of ePIE for simulated EUV or soft x-ray ptychography data
 Done for the purpose of learning how to write and call more performant code within Python when needed. 
 Originally, I planned on implementing the backend with Fortran, hence "FrePIE", but I gave up using that arcane language and kept the name. 
 Next, I tried C with Python's native ctypes, but complex numbers and pointer arithmatic created unnecessary headaches.
-Finally, I landed on C++ with PyBind11, which allows almost seamless integration.
+Finally, I landed on C++ with PyBind11, which allows (not quite) seamless integration.
 
 The requirements are as follows:
 * PyBind11 (installed with pip)
@@ -13,11 +13,15 @@ The requirements are as follows:
 ## Takeaways
 * I should never take NumPy for granted. 
 Sure, for-loops are slow in Python, but vectorized array operations compiled from Fortran are fast.
-Especially so when written by developers more talanted than I.
 * Simply switching to a lower-level language does not guarantee substantial performance gains.
-It's surprisingly easy to write very bad C++, especially when 
+It's surprisingly easy to write C++ that is poorly performant.
 My first pass at the core ePIE routine was about 15x slower than Python/NumPy.
-Successive optimizations closed the gap
+Successive optimizations eventually overcame the gap. 
+However, this is somewhat volatile, and has appeared to depend substantially on external factors such as what version of FFTW I had installed (i.e. whether from vcpkg or from the Fedora repositories).
+The right compiler flags also makes an immense difference.
+* The process of linking types, especially complicated ones like complex-valued tensors, between Python and C++ is not abundantly elegant. 
+Though I've learned a lot, I don't believe this is an approach I am likely to repeat.
+Unless I really need to hand-roll some complicated linear algebra routine, I am probably better off investigating something like Julia.
 
 
 # References
