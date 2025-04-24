@@ -16,6 +16,10 @@ FFT2::FFT2(int rows, int cols, int direction)
       in_(rows, cols),
       out_(rows, cols)
 {
+
+  // fftw_init_threads();
+  // fftw_plan_with_nthreads(2);
+
   plan_ = fftw_plan_dft_2d(rows_, cols_,
                            reinterpret_cast<fftw_complex*>(in_.data()),
                            reinterpret_cast<fftw_complex*>(out_.data()),

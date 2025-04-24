@@ -55,18 +55,19 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
       fft.compute(psi, psi_k);
 
       // replace modulus with (amplitude of..) diffraction pattern
-      assert(dps[k].rows() == psi_k.rows() && dps[k].cols() == psi_k.cols());
+      // assert(dps[k].rows() == psi_k.rows() && dps[k].cols() == psi_k.cols());
       ifft.compute(dps[k] * psi_k / psi_k.abs(), psi_p);
-      d_psi = psi_p - psi;
 
       // update obj, prb, error
+      d_psi = psi_p - psi;
+
       obj.block(x_pos, y_pos, prb_dx, prb_dy) = lil_obj + obj_step *
         d_psi * prb.conjugate() / prb.abs2().maxCoeff();
 
       prb = prb + prb_step *
         d_psi * lil_obj.conjugate() / lil_obj.abs2().maxCoeff();
 
-      error_per_iter += std::pow(d_psi.abs().sum()/(prb_dx*prb_dy), 2);
+      error_per_iter += std::pow(d_psi.abs().mean(), 2);
 
     }
     
