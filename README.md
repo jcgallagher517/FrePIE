@@ -10,6 +10,15 @@ The requirements are as follows:
 * PyBind11 (installed with pip)
 * Eigen3, FFTW3 (installed with vcpkg)
 
+## Takeaways
+* I should never take NumPy for granted. 
+Sure, for-loops are slow in Python, but vectorized array operations compiled from Fortran are fast.
+Especially so when written by developers more talanted than I.
+* Simply switching to a lower-level language does not guarantee substantial performance gains.
+It's surprisingly easy to write very bad C++, especially when 
+My first pass at the core ePIE routine was about 15x slower than Python/NumPy.
+Successive optimizations closed the gap
+
 
 # References
 

@@ -33,6 +33,6 @@ ext_modules = [
         libraries = ["fftw3"],
         language = "c++",
         cxx_std = 17,
-        extra_compile_args = ["-Wall"])]
+        extra_compile_args = ["-Wall", "-O3", "-march=native"])]
 
 setup(name = "libFrePIE", ext_modules = ext_modules)
