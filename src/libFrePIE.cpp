@@ -58,11 +58,20 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
   ArrayXcdRM eigen_obj = numpy_to_eigen(obj);
   ArrayXcdRM eigen_prb = numpy_to_eigen(prb);
 
+  // cast scan_pos as a vec of vecs
+  py::buffer_info scan_pos_buf = scan_pos.request();
+  assert(scan_pos_buf.ndim == 2 && scan_pos_buf.shape[1] == 2);
+  int* scan_pos_ptr = static_cast<int*>(scan_pos_buf.ptr);
+  std::vector<std::vector<int>> cpp_scan_pos(scan_pos_buf.shape[0]);
+  for (int k = 0; k < scan_pos_buf.shape[0]; ++k) {
+    cpp_scan_pos[k] = { scan_pos_ptr[2*k], scan_pos_ptr[2*k+1] };
+  }
+
   // only eigen_obj and eigen_prb are passed by reference
   std::vector<double> errors = ePIE(eigen_obj,
                                     eigen_prb,
                                     dps_to_eigen(dps),
-                                    numpy_to_eigen(scan_pos),
+                                    cpp_scan_pos,
                                     obj_step, prb_step, n_iters);
 
   // copy data from eigen_obj/eigen_prb back to python data pointers

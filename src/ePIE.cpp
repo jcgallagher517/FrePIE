@@ -14,11 +14,11 @@ using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, 
 
 std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
                          const std::vector<eig::ArrayXd> &dps,
-                         const eig::ArrayXi &scan_pos, double obj_step,
-                         double prb_step, int n_iters) {
+                         const std::vector<std::vector<int>> &scan_pos,
+                         double obj_step, double prb_step, int n_iters) {
 
-  int n_dps = dps.size();
-  if (scan_pos.rows() != n_dps) {
+  unsigned int n_dps = dps.size();
+  if (scan_pos.size() != n_dps) {
     throw std::runtime_error("# of scan positions must equal # of dps");
   }
 
@@ -34,6 +34,7 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
 
   ArrayXcdRM psi(prb_dx, prb_dy);
   ArrayXcdRM psi_k(prb_dx, prb_dy);
+  ArrayXcdRM psi_k_p(prb_dx, prb_dy);
   ArrayXcdRM psi_p(prb_dx, prb_dy);
   ArrayXcdRM d_psi(prb_dx, prb_dy);
   ArrayXcdRM lil_obj(prb_dx, prb_dy);
@@ -44,9 +45,10 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
     auto iter_start = std::chrono::high_resolution_clock::now();
     error_per_iter = 0;
 
-    for (int k = 0; k < n_dps; ++k) {
-      x_pos = scan_pos(k, 0);
-      y_pos = scan_pos(k, 1);
+    for (size_t k = 0; k < n_dps; ++k) {
+      x_pos = scan_pos[k][0];
+      y_pos = scan_pos[k][1];
+
       lil_obj = obj.block(x_pos, y_pos, prb_dx, prb_dy);
 
       // exit wave and its Fourier transform
@@ -55,7 +57,8 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
 
       // replace modulus with (amplitude of..) diffraction pattern
       // assert(dps[k].rows() == psi_k.rows() && dps[k].cols() == psi_k.cols());
-      ifft.compute(dps[k] * psi_k / psi_k.abs(), psi_p);
+      psi_k_p = dps[k] * psi_k / psi_k.abs();
+      ifft.compute(psi_k_p, psi_p);
 
       // update obj, prb, error
       d_psi = psi_p - psi;

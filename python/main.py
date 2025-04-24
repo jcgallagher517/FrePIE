@@ -17,12 +17,22 @@ scan_pos, dps = simulate_data(ground_truth, defocused_probe)
 init_obj = np.exp(1j*np.random.random(ground_truth.shape))
 
 # "reconstruct" ground_truth just to see fft and fftshift work
-results_dict = FrePIE(ground_truth, init_probe, dps, scan_pos,
-                      obj_step = 1, prb_step = 1, n_iters = 50)
+results_dict = FrePIE(init_obj, init_probe, dps, scan_pos,
+                      obj_step = 0.1, prb_step = 0.1, n_iters = 15)
 
 rec_object = results_dict["recon"]
 rec_probe = results_dict["probe"]
 rec_error = results_dict["error"]
+
+fig, ax = plt.subplots(1, 2)
+
+ax[0].imshow(np.angle(rec_object))
+ax[0].set_title("Reconstructed Phase")
+
+ax[1].imshow(np.abs(rec_object))
+ax[1].set_title("Reconstructed Modulus")
+
+plt.show()
 
 # THERE IS A MINOR BUG IN SIMULATION CODE
 # last scan_pos on either axis is 372

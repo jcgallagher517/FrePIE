@@ -10,7 +10,7 @@ using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, 
 std::vector<double> ePIE(ArrayXcdRM& obj,
                          ArrayXcdRM& prb, 
                          const std::vector<eig::ArrayXd>& dps,
-                         const eig::ArrayXi& scan_pos,
+                         const std::vector<std::vector<int>> &scan_pos,
                          double obj_step, double prb_step, int n_iters);
   /* ePIE ptychographic reconstruction routine
      @params:
