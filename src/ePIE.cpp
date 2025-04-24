@@ -7,6 +7,7 @@
 #include <cmath>
 #include <fftw3.h>
 #include <vector>
+#include <chrono>
 
 namespace eig = Eigen;
 // using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
@@ -38,7 +39,10 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
   ArrayXcdRM d_psi(prb_dx, prb_dy);
   ArrayXcdRM lil_obj(prb_dx, prb_dy);
 
+  std::cout << "Commencing reconstruction...\n";
   for (int iter = 1; iter <= n_iters; ++iter) {
+    auto iter_start = std::chrono::high_resolution_clock::now();
+
     error_per_iter = 0;
     for (int k = 0; k < n_dps; ++k) {
       x_pos = scan_pos(k, 0);
@@ -57,16 +61,20 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
       // update obj, prb, error
 
       obj(eig::seqN(x_pos, prb_dx), eig::seqN(y_pos, prb_dy)) = lil_obj +
-        obj_step * d_psi * prb.conjugate() / prb.abs().pow(2).maxCoeff();
+        obj_step * d_psi * prb.conjugate() / prb.abs2().maxCoeff();
 
       prb = prb + prb_step *
-        d_psi * lil_obj.conjugate() / lil_obj.abs().pow(2).maxCoeff();
+        d_psi * lil_obj.conjugate() / lil_obj.abs2().maxCoeff();
 
       error_per_iter += std::pow(d_psi.abs().sum()/(prb_dx*prb_dy), 2);
 
     }
     
-    std::cout << "Iteration " << iter << ", Error: " << error_per_iter << "\n";
+    auto iter_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = iter_end - iter_start;
+    std::cout << "Iteration " << iter
+              << ", Error: " << error_per_iter
+              << ", Time: " << duration.count() << "s\n";
     errors[iter - 1] = error_per_iter;
 
   }

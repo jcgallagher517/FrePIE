@@ -1,15 +1,18 @@
 import numpy as np
 from numpy.fft import fft2, ifft2, fftshift, ifftshift
+import timeit
 
 def PyePIE(init_obj, init_prb, dps, scan_pos,
-           obj_step = 1, prb_step = 1, N_iters = 100):
+           obj_step = 1, prb_step = 1, n_iters = 100):
     """python implementation of ePIE for prototyping and speed comparison
     same arguments and returns as FrePIE
     """
     obj, prb = init_obj, init_prb
     prb_sz = init_prb.shape[0]
-    errors = []
-    for iter in range(N_iters):
+    time_elapsed, errors = 0, []
+    print("Commencing reconstruction...")
+    for iter in range(n_iters):
+        iter_start = timeit.default_timer()
         error_per_iter = 0
         for (x, y), dp in zip(scan_pos, dps):
 
@@ -29,6 +32,10 @@ def PyePIE(init_obj, init_prb, dps, scan_pos,
 
             error_per_iter += np.mean(np.abs(psi_p - psi))**2
 
+        time_diff = timeit.default_timer() - iter_start
+        time_elapsed += time_diff
+        print(f"Iteration {iter+1}, Error: {error_per_iter}, Time: {time_diff}s")
         errors.append(np.sqrt(error_per_iter))
 
-    return obj, prb, np.array(errors)
+    print(f"Reconstruction completed. Time elapsed: {time_elapsed}s")
+    return {"recon":obj, "probe":prb, "error":np.array(errors)}
