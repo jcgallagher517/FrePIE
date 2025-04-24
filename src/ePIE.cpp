@@ -3,17 +3,18 @@
 #include <Eigen/Dense>
 #include <assert.h>
 #include <complex>
+#include <iostream>
 #include <cmath>
 #include <fftw3.h>
 #include <vector>
 
 namespace eig = Eigen;
-using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+// using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
 using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
 
-std::vector<double> ePIE(MatXcdRM &obj, MatXcdRM &prb,
-                         const std::vector<eig::MatrixXd> &dps,
-                         const eig::MatrixXi &scan_pos, double obj_step,
+std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
+                         const std::vector<eig::ArrayXd> &dps,
+                         const eig::ArrayXi &scan_pos, double obj_step,
                          double prb_step, int n_iters) {
 
   int n_dps = dps.size();
@@ -43,7 +44,7 @@ std::vector<double> ePIE(MatXcdRM &obj, MatXcdRM &prb,
       x_pos = scan_pos(k, 0);
       y_pos = scan_pos(k, 1);
 
-      lil_obj = obj(eig::seqN(x_pos, prb_dx), eig::seqN(y_pos, prb_dy)).array();
+      lil_obj = obj(eig::seqN(x_pos, prb_dx), eig::seqN(y_pos, prb_dy));
 
       // exit wave and its Fourier transform
       psi = lil_obj * prb;
@@ -64,7 +65,10 @@ std::vector<double> ePIE(MatXcdRM &obj, MatXcdRM &prb,
       error_per_iter += std::pow(d_psi.abs().sum()/(prb_dx*prb_dy), 2);
 
     }
+    
+    std::cout << "Iteration " << iter << ", Error: " << error_per_iter << "\n";
     errors[iter - 1] = error_per_iter;
+
   }
 
   return errors;

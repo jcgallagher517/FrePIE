@@ -1,38 +1,39 @@
 #ifndef FFT2_HPP
 #define FFT2_HPP
 
-/* class for doing 2D fast-fourier-transforms of complex-valued matrices
+/* class for doing 2D fast-fourier-transforms of complex-valued arrays
  */
 
 #include <Eigen/Dense>
 #include <fftw3.h>
 
 namespace eig = Eigen;
-using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+// using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
 
 class FFT2 {
 public:
 
   /* constructor and destructor
-     initializes FFT plan to apply for rows x cols matrix
+     initializes FFT plan to apply for rows x cols array 
      direction: FFTW_FORWARD or FFTW_BACKWARD
    */
   FFT2(int rows, int cols, int direction);
   ~FFT2();
 
-  void compute(const MatXcdRM& input, MatXcdRM& output);
+  void compute(const ArrayXcdRM& input, ArrayXcdRM& output);
 
-  MatXcdRM fftshift(const MatXcdRM& input);
-  MatXcdRM ifftshift(const MatXcdRM& input);
+  ArrayXcdRM fftshift(const ArrayXcdRM& input);
+  ArrayXcdRM ifftshift(const ArrayXcdRM& input);
 
 private:
   
   int rows_, cols_;
   int direction_;
-  MatXcdRM in_, out_;
+  ArrayXcdRM in_, out_;
   fftw_plan plan_;
 
-  MatXcdRM circshift(const MatXcdRM& input, int row_shift, int col_shift);
+  ArrayXcdRM circshift(const ArrayXcdRM& input, int row_shift, int col_shift);
 
 };
 

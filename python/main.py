@@ -18,7 +18,7 @@ init_obj = np.exp(1j*np.random.random(ground_truth.shape))
 
 # "reconstruct" ground_truth just to see fft and fftshift work
 results_dict = FrePIE(ground_truth, init_probe, dps, scan_pos,
-                      obj_step = 1, prb_step = 1, n_iters = 100)
+                      obj_step = 1, prb_step = 1, n_iters = 10)
 
 rec_object = results_dict["recon"]
 rec_probe = results_dict["probe"]

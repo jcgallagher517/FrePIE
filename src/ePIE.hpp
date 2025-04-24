@@ -6,11 +6,11 @@
 
 namespace eig = Eigen;
 
-using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
-std::vector<double> ePIE(MatXcdRM& obj,
-                         MatXcdRM& prb, 
-                         const std::vector<eig::MatrixXd>& dps,
-                         const eig::MatrixXi& scan_pos,
+using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+std::vector<double> ePIE(ArrayXcdRM& obj,
+                         ArrayXcdRM& prb, 
+                         const std::vector<eig::ArrayXd>& dps,
+                         const eig::ArrayXi& scan_pos,
                          double obj_step, double prb_step, int n_iters);
   /* ePIE ptychographic reconstruction routine
      @params:

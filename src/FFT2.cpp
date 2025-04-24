@@ -26,7 +26,7 @@ FFT2::~FFT2() {
   fftw_destroy_plan(plan_);
 }
 
-void FFT2::compute(const MatXcdRM& input, MatXcdRM& output) {
+void FFT2::compute(const ArrayXcdRM& input, ArrayXcdRM& output) {
   in_ = input;
   fftw_execute(plan_);
   output = out_;
@@ -36,10 +36,10 @@ void FFT2::compute(const MatXcdRM& input, MatXcdRM& output) {
   }
 }
 
-MatXcdRM FFT2::circshift(const MatXcdRM &input, int row_shift, int col_shift) {
+ArrayXcdRM FFT2::circshift(const ArrayXcdRM &input, int row_shift, int col_shift) {
   int rows = input.rows();
   int cols = input.cols();
-  MatXcdRM output(rows, cols);
+  ArrayXcdRM output(rows, cols);
   assert(rows == output.rows() && cols == output.cols());
 
   // credit to this stackoverflow answer
@@ -54,10 +54,10 @@ MatXcdRM FFT2::circshift(const MatXcdRM &input, int row_shift, int col_shift) {
   return output;
 }
 
-MatXcdRM FFT2::fftshift(const MatXcdRM& input) {
+ArrayXcdRM FFT2::fftshift(const ArrayXcdRM& input) {
   return FFT2::circshift(input, input.rows()/2, input.cols()/2);
 }
 
-MatXcdRM FFT2::ifftshift(const MatXcdRM& input) {
+ArrayXcdRM FFT2::ifftshift(const ArrayXcdRM& input) {
   return FFT2::circshift(input, (input.rows() + 1)/2, (input.cols() + 1)/2);
 }

@@ -10,9 +10,9 @@
 namespace py = pybind11;
 namespace eig = Eigen;
 
-// cast the py::array_t objects as Eigen matrices
+// cast the py::array_t objects as Eigen arrays
 template <typename T>
-eig::Matrix<T, eig::Dynamic, eig::Dynamic>
+eig::Array<T, eig::Dynamic, eig::Dynamic>
 numpy_to_eigen(py::array_t<T> array) {
 
   py::buffer_info buf = array.request();
@@ -21,13 +21,13 @@ numpy_to_eigen(py::array_t<T> array) {
   }
   int rows = buf.shape[0];
   int cols = buf.shape[1];
-  using MatrixType = eig::Matrix<T, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
-  return eig::Map<MatrixType>(static_cast<T*>(buf.ptr), rows, cols);
+  using ArrayType = eig::Array<T, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+  return eig::Map<ArrayType>(static_cast<T*>(buf.ptr), rows, cols);
 }
 
 
-// ad hoc turn dps into a vector of Eigen matrices for each dp
-std::vector<eig::MatrixXd> dps_to_eigen(py::array_t<double> dps) {
+// ad hoc turn dps into a vector of Eigen arrays for each dp
+std::vector<eig::ArrayXd> dps_to_eigen(py::array_t<double> dps) {
 
   // collect info from numpy array
   py::buffer_info buf = dps.request();
@@ -37,10 +37,10 @@ std::vector<eig::MatrixXd> dps_to_eigen(py::array_t<double> dps) {
   int cols = buf.shape[2];
 
   // un-flatten data, every row*col is the next dp
-  std::vector<eig::MatrixXd> new_dps(n_dps);
-  using MatrixType = eig::Matrix<double, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+  std::vector<eig::ArrayXd> new_dps(n_dps);
+  using ArrayType = eig::Array<double, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
   for (int k = 0; k < n_dps; ++k) {
-    new_dps[k] = eig::Map<MatrixType>(data + k * rows * cols, rows, cols);
+    new_dps[k] = eig::Map<ArrayType>(data + k * rows * cols, rows, cols);
   }
   return new_dps;
 }
@@ -53,10 +53,10 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
                                  double obj_step, double prb_step, int n_iters)
 {
 
-  // cast object and probe as eigen matrices
-  using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
-  MatXcdRM eigen_obj = numpy_to_eigen(obj);
-  MatXcdRM eigen_prb = numpy_to_eigen(prb);
+  // cast object and probe as eigen arrays
+  using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+  ArrayXcdRM eigen_obj = numpy_to_eigen(obj);
+  ArrayXcdRM eigen_prb = numpy_to_eigen(prb);
 
   // only eigen_obj and eigen_prb are passed by reference
   std::vector<double> errors = ePIE(eigen_obj,
