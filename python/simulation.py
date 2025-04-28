@@ -26,8 +26,9 @@ def simulate_data(gt, probe):
 
     num_pos = 32 # scan positions per axis, hard-coded :( but whatever I'm not re-using this
     x_rng, y_rng = gt.shape[0] - probe.shape[0], gt.shape[1] - probe.shape[1]
-    x_scan_idxs = np.arange(0, x_rng, x_rng//num_pos)
-    y_scan_idxs = np.arange(0, y_rng, y_rng//num_pos)
+
+    x_scan_idxs = np.arange(0, x_rng + 1, x_rng//num_pos)
+    y_scan_idxs =  np.arange(0, y_rng + 1, y_rng//num_pos)
 
     # initialize diffraction patterns
     dps = np.zeros((*probe.shape, len(x_scan_idxs)*len(y_scan_idxs)),

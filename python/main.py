@@ -17,7 +17,7 @@ scan_pos, dps = simulate_data(ground_truth, defocused_probe)
 init_obj = np.exp(1j*np.random.random(ground_truth.shape))
 
 # "reconstruct" ground_truth just to see fft and fftshift work
-results_dict = PyePIE(init_obj, init_probe, dps, scan_pos,
+results_dict = FrePIE(init_obj, init_probe, dps, scan_pos,
                       obj_step = 0.1, prb_step = 0.1, n_iters = 50)
 
 rec_object = results_dict["recon"]
@@ -33,10 +33,3 @@ ax[1].imshow(np.abs(rec_object))
 ax[1].set_title("Reconstructed Modulus")
 
 plt.show()
-
-# THERE IS A MINOR BUG IN SIMULATION CODE
-# last scan_pos on either axis is 372
-# 372 + 128 = 500 != 512
-# the scan positions are in steps of 12
-# so I am missing the last 12 pixels along either axis
-# which I noticed earlier from PyePIE and found strange
