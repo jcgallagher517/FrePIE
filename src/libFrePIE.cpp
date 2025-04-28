@@ -26,25 +26,6 @@ numpy_to_eigen(py::array_t<T> array) {
 }
 
 
-// ad hoc turn dps into a vector of Eigen arrays for each dp
-std::vector<eig::ArrayXd> dps_to_eigen(py::array_t<double> dps) {
-
-  // collect info from numpy array
-  py::buffer_info buf = dps.request();
-  double* data = static_cast<double*>(buf.ptr);
-  int n_dps = buf.shape[0];
-  int rows = buf.shape[1];
-  int cols = buf.shape[2];
-
-  // un-flatten data, every row*col is the next dp
-  std::vector<eig::ArrayXd> new_dps(n_dps);
-  using ArrayType = eig::Array<double, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
-  for (int k = 0; k < n_dps; ++k) {
-    new_dps[k] = eig::Map<ArrayType>(data + k * rows * cols, rows, cols);
-  }
-  return new_dps;
-}
-
 // wrapper function to call ePIE implementation as defined in ePIE.cpp
 py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
                                  py::array_t<std::complex<double>> prb,
@@ -57,20 +38,33 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
   using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
   ArrayXcdRM eigen_obj = numpy_to_eigen(obj);
   ArrayXcdRM eigen_prb = numpy_to_eigen(prb);
-
-  // cast scan_pos as a vec of vecs
+  
+  // cast scan_pos as vec of vecs
   py::buffer_info scan_pos_buf = scan_pos.request();
+  int n_dps = scan_pos_buf.shape[0];
   assert(scan_pos_buf.ndim == 2 && scan_pos_buf.shape[1] == 2);
   int* scan_pos_ptr = static_cast<int*>(scan_pos_buf.ptr);
-  std::vector<std::vector<int>> cpp_scan_pos(scan_pos_buf.shape[0]);
+  std::vector<std::vector<int>> cpp_scan_pos(n_dps);
+
+  // cast dps as vec of Eigen::ArrayXdRM
+  py::buffer_info dps_buf = dps.request();
+  assert(n_dps = dps_buf.shape[0]); // should be as many dps as scan positions
+  double* dps_ptr = static_cast<double*>(dps_buf.ptr);
+  int rows = dps_buf.shape[1];
+  int cols = dps_buf.shape[2];
+  using ArrayXdRM = eig::Array<double, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+  std::vector<ArrayXdRM> cpp_dps(n_dps);
+
+  // populate both dps and scan_pos
   for (int k = 0; k < scan_pos_buf.shape[0]; ++k) {
     cpp_scan_pos[k] = { scan_pos_ptr[2*k], scan_pos_ptr[2*k+1] };
+    cpp_dps[k] = eig::Map<ArrayXdRM>(dps_ptr + k * rows * cols, rows, cols);
   }
 
   // only eigen_obj and eigen_prb are passed by reference
   std::vector<double> errors = ePIE(eigen_obj,
                                     eigen_prb,
-                                    dps_to_eigen(dps),
+                                    cpp_dps,
                                     cpp_scan_pos,
                                     obj_step, prb_step, n_iters);
 
