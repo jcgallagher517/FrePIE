@@ -30,9 +30,12 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
   FFT2 ifft(prb_dx, prb_dy, FFTW_BACKWARD);
 
   std::vector<double> errors(n_iters);
-  double error_per_iter;
-  int x_pos, y_pos;
+  double error_per_iter, error_norm = 0;
+  for (size_t k = 0; k < n_dps; ++k) {
+    error_norm += dps[k].abs2().sum();
+  }
 
+  int x_pos, y_pos;
   ArrayXcdRM psi(prb_dx, prb_dy);
   ArrayXcdRM psi_k(prb_dx, prb_dy);
   ArrayXcdRM psi_k_p(prb_dx, prb_dy);
@@ -70,7 +73,7 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
       prb = prb + prb_step *
         d_psi * lil_obj.conjugate() / lil_obj.abs2().maxCoeff();
 
-      error_per_iter += std::pow(d_psi.abs().mean(), 2);
+      error_per_iter += d_psi.abs2().mean();
 
     }
     
@@ -79,7 +82,7 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
     std::cout << "Iteration " << iter
               << ", Error: " << error_per_iter
               << ", Time: " << duration.count() << "s\n";
-    errors[iter - 1] = error_per_iter;
+    errors[iter - 1] = error_per_iter / error_norm;
 
   }
 

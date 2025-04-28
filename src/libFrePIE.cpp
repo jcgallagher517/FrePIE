@@ -5,8 +5,6 @@
 #include <Eigen/Dense>
 #include "ePIE.hpp"
 
-#include <iostream>
-
 namespace py = pybind11;
 namespace eig = Eigen;
 

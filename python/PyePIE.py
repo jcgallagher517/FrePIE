@@ -10,6 +10,7 @@ def PyePIE(init_obj, init_prb, dps, scan_pos,
     obj, prb = init_obj, init_prb
     prb_sz = init_prb.shape[0]
     time_elapsed, errors = 0, []
+    error_norm = np.sum(np.abs(dps)**2)
     print("Commencing reconstruction...")
     for iter in range(n_iters):
         iter_start = timeit.default_timer()
@@ -30,7 +31,7 @@ def PyePIE(init_obj, init_prb, dps, scan_pos,
             obj[x:x+prb_sz, y:y+prb_sz] = lil_obj + obj_step*np.conj(prb)*(psi_p - psi)/np.max(np.abs(prb)**2)
             prb = prb + prb_step*np.conj(lil_obj)*(psi_p - psi)/np.max(np.abs(lil_obj)**2)
 
-            error_per_iter += np.mean(np.abs(psi_p - psi))**2
+            error_per_iter += np.mean(np.abs(psi_p - psi)**2)
 
         time_diff = timeit.default_timer() - iter_start
         time_elapsed += time_diff
