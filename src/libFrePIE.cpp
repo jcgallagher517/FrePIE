@@ -10,10 +10,11 @@
 namespace py = pybind11;
 namespace eig = Eigen;
 
+using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+using ArrayXdRM = eig::Array<double, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
+
 // cast the py::array_t objects as Eigen arrays
-template <typename T>
-eig::Array<T, eig::Dynamic, eig::Dynamic>
-numpy_to_eigen(py::array_t<T> array) {
+ArrayXcdRM numpy_to_eigen(py::array_t<std::complex<double>> array) {
 
   py::buffer_info buf = array.request();
   if (buf.ndim != 2) {
@@ -21,8 +22,7 @@ numpy_to_eigen(py::array_t<T> array) {
   }
   int rows = buf.shape[0];
   int cols = buf.shape[1];
-  using ArrayType = eig::Array<T, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
-  return eig::Map<ArrayType>(static_cast<T*>(buf.ptr), rows, cols);
+  return eig::Map<ArrayXcdRM>(static_cast<std::complex<double>*>(buf.ptr), rows, cols);
 }
 
 
@@ -35,7 +35,6 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
 {
 
   // cast object and probe as eigen arrays
-  using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
   ArrayXcdRM eigen_obj = numpy_to_eigen(obj);
   ArrayXcdRM eigen_prb = numpy_to_eigen(prb);
   
@@ -52,7 +51,6 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
   double* dps_ptr = static_cast<double*>(dps_buf.ptr);
   int rows = dps_buf.shape[1];
   int cols = dps_buf.shape[2];
-  using ArrayXdRM = eig::Array<double, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
   std::vector<ArrayXdRM> cpp_dps(n_dps);
 
   // populate both dps and scan_pos
