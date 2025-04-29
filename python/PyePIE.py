@@ -20,23 +20,24 @@ def PyePIE(init_obj, init_prb, dps, scan_pos,
             lil_obj = obj[x:x+prb_sz, y:y+prb_sz]
 
             # exit wave and its Fourier transform
-            psi = lil_obj*prb
+            psi = lil_obj * prb
             psi_k = fft2(psi)
 
             # replace modulus with (amplitude of..) diffraction pattern
-            psi_k_p = dp*psi_k/np.abs(psi_k)
+            psi_k_p = dp * psi_k / np.abs(psi_k)
             psi_p = ifft2(psi_k_p)
 
             # update object and probe
-            obj[x:x+prb_sz, y:y+prb_sz] = lil_obj + obj_step*np.conj(prb)*(psi_p - psi)/np.max(np.abs(prb)**2)
-            prb = prb + prb_step*np.conj(lil_obj)*(psi_p - psi)/np.max(np.abs(lil_obj)**2)
+            d_psi = psi_p - psi
+            obj[x:x+prb_sz, y:y+prb_sz] = lil_obj + obj_step * d_psi * np.conj(prb)/np.max(np.abs(prb)**2)
+            prb = prb + prb_step * d_psi * np.conj(lil_obj)/np.max(np.abs(lil_obj)**2)
 
             error_per_iter += np.mean(np.abs(psi_p - psi)**2)
 
         time_diff = timeit.default_timer() - iter_start
         time_elapsed += time_diff
-        print(f"Iteration {iter+1}, Error: {error_per_iter}, Time: {time_diff}s")
+        print(f"Iteration {iter+1}, Error: {error_per_iter}, Time: {time_diff:.5f}s")
         errors.append(np.sqrt(error_per_iter))
 
-    print(f"Reconstruction completed. Time elapsed: {time_elapsed}s")
+    print(f"Reconstruction completed. Time elapsed: {time_elapsed:.5f}s")
     return {"recon":obj, "probe":prb, "error":np.array(errors)}

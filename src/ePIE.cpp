@@ -43,6 +43,7 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
   ArrayXcdRM d_psi(prb_dx, prb_dy);
   ArrayXcdRM lil_obj(prb_dx, prb_dy);
 
+  double time_elapsed = 0;
   std::cout << "Commencing reconstruction...\n";
   for (int iter = 1; iter <= n_iters; ++iter) {
 
@@ -60,7 +61,6 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
       fft.compute(psi, psi_k);
 
       // replace modulus with (amplitude of..) diffraction pattern
-      // assert(dps[k].rows() == psi_k.rows() && dps[k].cols() == psi_k.cols());
       psi_k_p = dps[k] * psi_k / psi_k.abs();
       ifft.compute(psi_k_p, psi_p);
 
@@ -82,9 +82,11 @@ std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
     std::cout << "Iteration " << iter
               << ", Error: " << error_per_iter
               << ", Time: " << duration.count() << "s\n";
+    time_elapsed += static_cast<double>(duration.count());
     errors[iter - 1] = error_per_iter / error_norm;
 
   }
 
+  std::cout << "Reconstruction completed. Time elapsed: " << time_elapsed << "s\n";
   return errors;
 }

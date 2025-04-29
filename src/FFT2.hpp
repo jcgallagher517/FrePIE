@@ -8,7 +8,6 @@
 #include <fftw3.h>
 
 namespace eig = Eigen;
-// using MatXcdRM = eig::Matrix<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
 using ArrayXcdRM = eig::Array<std::complex<double>, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
 
 class FFT2 {

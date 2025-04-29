@@ -69,6 +69,7 @@ init_probe = support * np.exp(1j*np.random.random(defocused_probe.shape))
 
 # display probes if run as script
 if __name__ == "__main__":
+
     fig, ax = plt.subplots(2, 3, figsize=(10, 15))
 
     ax[0][0].imshow(np.abs(focused_probe))
@@ -89,4 +90,5 @@ if __name__ == "__main__":
     ax[1][2].imshow(np.angle(init_probe))
     ax[1][2].set_title("Initialized probe phase")
 
-    plt.show()
+    plt.savefig("../images/probes.png")
+
