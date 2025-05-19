@@ -2,11 +2,15 @@ import numpy as np
 from numpy.fft import fft2, ifft2, fftshift, ifftshift
 import timeit
 
-def PyePIE(init_obj, init_prb, dps, scan_pos,
-           obj_step = 1, prb_step = 1, n_iters = 100):
+def PyePIE(init_obj, init_prb, dps, scan_pos, **kwargs):
     """python implementation of ePIE for prototyping and speed comparison
-    same arguments and returns as FrePIE
     """
+    # fetch keyword arguments with default values
+    obj_step = kwargs.get("obj_step", 1)
+    prb_step = kwargs.get("prb_step", 1)
+    n_iters = kwargs.get("n_iters", 25)
+    prb_delay = kwargs.get("prb_delay", 0)
+
     obj, prb = init_obj, init_prb
     prb_sz = init_prb.shape[0]
     time_elapsed, errors = 0, []
@@ -30,7 +34,9 @@ def PyePIE(init_obj, init_prb, dps, scan_pos,
             # update object and probe
             d_psi = psi_p - psi
             obj[x:x+prb_sz, y:y+prb_sz] = lil_obj + obj_step * d_psi * np.conj(prb)/np.max(np.abs(prb)**2)
-            prb = prb + prb_step * d_psi * np.conj(lil_obj)/np.max(np.abs(lil_obj)**2)
+
+            if iter > prb_delay:
+                prb = prb + prb_step * d_psi * np.conj(lil_obj)/np.max(np.abs(lil_obj)**2)
 
             error_per_iter += np.mean(np.abs(psi_p - psi)**2)
 
