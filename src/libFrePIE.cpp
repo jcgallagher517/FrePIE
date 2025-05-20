@@ -29,7 +29,7 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
                                  py::array_t<std::complex<double>> prb,
                                  const py::array_t<double>& dps,
                                  const py::array_t<int>& scan_pos,
-                                 double obj_step, double prb_step, int n_iters)
+                                 double obj_step, double prb_step, int n_iters, int prb_delay)
 {
 
   // cast object and probe as eigen arrays
@@ -62,7 +62,7 @@ py::array_t<double> ePIE_wrapper(py::array_t<std::complex<double>> obj,
                                     eigen_prb,
                                     cpp_dps,
                                     cpp_scan_pos,
-                                    obj_step, prb_step, n_iters);
+                                    obj_step, prb_step, n_iters, prb_delay);
 
   // copy data from eigen_obj/eigen_prb back to python data pointers
   py::buffer_info obj_buf = obj.request();
@@ -80,5 +80,5 @@ PYBIND11_MODULE(libFrePIE, m) {
   m.def("ePIE", &ePIE_wrapper, "Robust iterative ptychography algorithm",
         py::arg("obj"), py::arg("prb"),
         py::arg("dps"), py::arg("scan_pos"),
-        py::arg("obj_step"), py::arg("prb_step"), py::arg("n_iters"));
+        py::arg("obj_step"), py::arg("prb_step"), py::arg("n_iters"), py::arg("prb_delay"));
 }

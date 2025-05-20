@@ -13,7 +13,7 @@ std::vector<double> ePIE(ArrayXcdRM& obj,
                          ArrayXcdRM& prb, 
                          const std::vector<ArrayXdRM>& dps,
                          const std::vector<std::vector<int>> &scan_pos,
-                         double obj_step, double prb_step, int n_iters);
+                         double obj_step, double prb_step, int n_iters, int prb_delay);
   /* ePIE ptychographic reconstruction routine
      @params:
          obj: initialized (guess) object to be reconstructed,

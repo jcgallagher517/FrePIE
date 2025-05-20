@@ -16,7 +16,7 @@ using ArrayXdRM = eig::Array<double, eig::Dynamic, eig::Dynamic, eig::RowMajor>;
 std::vector<double> ePIE(ArrayXcdRM &obj, ArrayXcdRM &prb,
                          const std::vector<ArrayXdRM> &dps,
                          const std::vector<std::vector<int>> &scan_pos,
-                         double obj_step, double prb_step, int n_iters) {
+                         double obj_step, double prb_step, int n_iters, int prb_delay) {
 
   unsigned int n_dps = dps.size();
   if (scan_pos.size() != n_dps) {

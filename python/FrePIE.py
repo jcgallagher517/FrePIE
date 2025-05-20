@@ -20,5 +20,5 @@ def FrePIE(init_obj, init_prb, dps, scan_pos, **kwargs):
     dps = np.ascontiguousarray(dps, dtype=np.float64)
     scan_pos = np.ascontiguousarray(scan_pos, dtype=np.int32)
     error = _ePIE_cpp(obj, prb, dps, scan_pos,
-                      obj_step, prb_step, n_iters)
+                      obj_step, prb_step, n_iters, prb_delay)
     return {"recon":obj, "probe":prb, "error":error}
